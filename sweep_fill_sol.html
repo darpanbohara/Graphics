@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sweep Fill</title>
+
+<!--CSC 240 (Fall 2016), Homework 2 (Sweep Fill Solution), S. Mathieson-->
+
+<script>
+    var canvas;    // DOM object corresponding to the canvas
+    var graphics;  // 2D graphics context for drawing on the canvas
+
+    // draws a line and returns a list of all the points in that line
+    function line(x1,y1,x2,y2,color) {
+        graphics.fillStyle = color;
+
+        // keep track of list of points in line
+        var pointsX = []
+        var pointsY = []
+
+        // x is changing faster than (or equal to y)
+        if (Math.abs(x1-x2) >= Math.abs(y1-y2)) {
+            
+            var m = (y2-y1)/(x2-x1); // compute slope
+
+            // start from the minimum of x1 and x2
+            var y = y1;
+            if (x1>x2) {
+                y = y2;
+            }
+        
+            // loop over x
+            for (var x = Math.min(x1,x2); x <= Math.max(x1,x2); x++) {
+                graphics.fillRect(x, y, 1, 1);
+                pointsX.push(Math.round(x))
+                pointsY.push(Math.round(y))
+                y += m;
+            }
+
+        // y is changing faster than x
+        } else {
+
+            var m_inverse = (x2-x1)/(y2-y1); // compute inverse of slope
+
+            // start from the minimum of y1 and y2
+            var x = x1;
+            if (y1>y2) {
+                x = x2;
+            }
+            
+            // loop over y
+            for (var y = Math.min(y1,y2); y <= Math.max(y1,y2); y++) {
+                graphics.fillRect(x,y,1,1);
+                pointsX.push(Math.round(x))
+                pointsY.push(Math.round(y))
+                x += m_inverse;
+            }
+        }
+
+        // return a list of all pixel coordinates colored for this line
+        return [pointsX,pointsY]
+    }
+
+    // draws a regular polygon with n sides, centered at (cx,cy), with radius r
+    function regularPolygon(n,cx,cy,r,lineColor,fillColor) {
+        var theta = 2*Math.PI/n;
+
+        // maintain a list of all points in this polygon
+        var pointsX = [];
+        var pointsY = [];
+
+        // start with the first point on the x axis, i.e. (r,0), then
+        // translate by cx and cy
+        var currX = cx+r;
+        var currY = cy;
+        
+        for (var i=0; i < n; i++) {
+            var angle = (i+1)*theta;
+            var x = Math.round(r*Math.cos(angle) + cx);
+            var y = Math.round(r*Math.sin(angle) + cy);
+
+            // store the points for this line, and add them to the list of all points
+            var sidePoints = line(currX,currY,x,y,lineColor);
+            pointsX = pointsX.concat(sidePoints[0]);
+            pointsY = pointsY.concat(sidePoints[1]);
+            currX = x;
+            currY = y;
+        }
+
+        // now fill
+        graphics.fillStyle = fillColor; // change fill color
+        ymin = Math.min(...pointsY); // how to get min over a list
+        ymax = Math.max(...pointsY); // how to get max over a list
+
+        // loop over y-coordinates from min to max
+        for (var yTarget=ymin; yTarget < ymax; yTarget++) {
+            var matchingY = []; // list of all x-coordinates with this y-coordinate
+            for (var i=0; i < pointsX.length; i++) {
+                var x = pointsX[i];
+                var y = pointsY[i];
+                if (y == yTarget) {
+                    matchingY.push(x);
+                }
+            }
+
+            // for all points with this y-coordinate, find the min/max x-coordinates
+            // fill in the line between these two points
+            var minx = Math.min(...matchingY);
+            var maxx = Math.max(...matchingY);
+
+            // finally fill in this line! (+1/-1 to not color the edge)
+            line(minx+1,yTarget,maxx-1,yTarget,fillColor);
+        }
+    }
+    
+    function draw() {
+        // note we can draw a very large shape now! (radius = 200)
+        regularPolygon(5,200,200,200,"deeppink","aqua");
+    }
+
+    function init() {
+        canvas = document.getElementById("theCanvas");
+        graphics = canvas.getContext("2d");
+        draw();  // draw something on the canvas
+    }
+</script>
+
+
+</head>
+<body onload="init()">
+    <canvas id="theCanvas" width="640" height="480"></canvas>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<head>
+<title>Pyramid</title>
+<script src="three.min.js"></script>
+
+<!-- Modified from the MeshFaceMaterial.html example in our textbook 
+    (Introduction to Computer Graphics) by David J. Eck -->
+
+<script>
+//Darpan Bohara
+//Prayasha Chaudhary
+//Cities with stars
+    var scene, camera, renderer; // Three.js rendering basics.
+    var canvas; // The canvas on which the image is rendered.
+    var cube;
+    var star;
+    var sphere;
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    var count = 0;
+
+    function createWorld() {
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(90, 2, 1, 30);
+        camera.position.z = 4;
+        camera.position.y = 0.5;
+        // camera.position.y = 0;
+    
+        // create some lights and add them to the scene.
+        // dim light shining from above
+        scene.add( new THREE.DirectionalLight( 0xffffff,0.4) );
+
+        // a light to shine in the direction the camera faces
+        var viewpointLight = new THREE.DirectionalLight( 0xffffff, 0.8 );  
+        viewpointLight.position.set(10,5,30);  // shines down the z-axis
+        scene.add(viewpointLight);
+
+        var geometry = new THREE.PlaneGeometry(12,5 );
+        var material = new THREE.MeshBasicMaterial({color: 0x808080, side: THREE.DoubleSide});
+        var plane = new THREE.Mesh( geometry, material );
+        plane.rotation.set(Math.PI/2,0,0)
+        scene.add( plane );
+    }
+
+    function galaxy(cx,cy,cz){
+        var geometry = new THREE.SphereBufferGeometry( .05, 10, 10 );
+        var material = new THREE.MeshBasicMaterial( {color: 0x000080} );
+        var sphere = new THREE.Mesh( geometry, material );
+        var random = Math.random();
+        sphere.position.z = cz - 1;
+        sphere.position.x = cx ;
+        sphere.position.y = cy +1 ;
+
+        scene.add( sphere );
+    }
+    function tinyStars(cx,cy,cz,height){
+        // set up the geometry for our pyramid
+        var starGeom = new THREE.Geometry();
+        starGeom.vertices = [  // array of Vector3 giving vertex coordinates
+            new THREE.Vector3(cx+0.1,cy,cz+0.02),  
+            new THREE.Vector3(cx+0.1,cy,cz-0.02),  
+            new THREE.Vector3(cx,cy,cz-0.02),  
+            new THREE.Vector3(cx,cy,cz+0.02),  
+            new THREE.Vector3(cx+0.1,cy+height,cz-0.02),
+            new THREE.Vector3(cx+0.1,cy+height,cz+0.02),
+            new THREE.Vector3(cx,cy+height,cz+0.02),
+            new THREE.Vector3(cx,cy+height,cz-0.02)
+        ];
+        
+        starGeom.faces = [  // array of Face3 giving the triangular faces
+            new THREE.Face3(3,2,1),  // one half of the bottom face
+            new THREE.Face3(3,1,0), 
+             // second half of the bottom face
+
+            new THREE.Face3(2,3,6),
+            new THREE.Face3(2,6,7),
+
+            new THREE.Face3(1,2,7),
+            new THREE.Face3(1,7,4),
+
+            new THREE.Face3(0,1,4),
+            new THREE.Face3(0,4,5),
+           
+            new THREE.Face3(3,5,6),
+            new THREE.Face3(3,0,5),
+
+            new THREE.Face3(6,4,7),
+            new THREE.Face3(6,5,4),    
+
+
+        ];
+        // compute normals so we know which way is facing "out"
+        starGeom.computeFaceNormals();
+    
+        // map the faces to materials
+        starGeom.faces[0].materialIndex = 0;
+        for (var i = 1; i <= 6; i++) {
+            starGeom.faces[i].materialIndex = i-1;
+        }
+    
+        // Creates a material for the pyramid that is "matte" not "shiny".
+        var starFaceMaterial = new THREE.MeshFaceMaterial( [
+            new THREE.MeshLambertMaterial( { color: 0xFFFF00, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xFFFF00, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xFFFF00, shading: THREE.FlatShading } ),
+        
+            new THREE.MeshLambertMaterial( { color: 0xFFFF00, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xFFFF00, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xFFFF00, shading: THREE.FlatShading } )
+        ] );
+        star = new THREE.Mesh( starGeom, starFaceMaterial );
+        star.rotation.set(0,3,0);
+        scene.add(star);
+       // pyramid.rotation.set(1,5,0.1);    
+     }
+
+
+    function buildings(cx,cy,cz,height){
+        // set up the geometry for our pyramid
+        var cubeGeom = new THREE.Geometry();
+        
+        cubeGeom.vertices = [  // array of Vector3 giving vertex coordinates
+            new THREE.Vector3(cx+0.4,cy,cz+0.1), 
+            new THREE.Vector3(cx+0.4,cy,cz-0.1),  
+            new THREE.Vector3(cx,cy,cz-0.1),  
+            new THREE.Vector3(cx,cy,cz+0.1),  
+            new THREE.Vector3(cx+0.4,cy+height,cz-0.1),
+            new THREE.Vector3(cx+0.4,cy+height,cz+0.1),
+            new THREE.Vector3(cx,cy+height,cz+0.1),
+            new THREE.Vector3(cx,cy+height,cz-0.1)       
+        ];
+
+        cubeGeom.faces = [  // array of Face3 giving the triangular faces
+            new THREE.Face3(3,2,1),  // one half of the bottom face
+            new THREE.Face3(3,1,0), 
+
+            new THREE.Face3(2,3,6),
+            new THREE.Face3(2,6,7),
+
+            new THREE.Face3(1,2,7),
+            new THREE.Face3(1,7,4),
+
+            new THREE.Face3(0,1,4),
+            new THREE.Face3(0,4,5),
+           
+            new THREE.Face3(3,5,6),
+            new THREE.Face3(3,0,5),
+           
+
+            new THREE.Face3(6,4,7),
+            new THREE.Face3(6,5,4),    
+        ];
+        // compute normals so we know which way is facing "out"
+        cubeGeom.computeFaceNormals();
+    
+        // map the faces to materials
+        cubeGeom.faces[0].materialIndex = 0;
+        for (var i = 1; i <= 6; i++) {
+            cubeGeom.faces[i].materialIndex = i-1;
+        }
+    
+        // Creates a material for the pyramid that is "matte" not "shiny".
+        var cubeFaceMaterial = new THREE.MeshFaceMaterial( [
+            new THREE.MeshLambertMaterial( { color: 0xF08080, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xFF4500, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xFF00FF, shading: THREE.FlatShading } ),
+        
+            new THREE.MeshLambertMaterial( { color: 0x00BFFF, shading: THREE.FlatShading } ),
+
+             new THREE.MeshLambertMaterial( { color: 0x00FFFF, shading: THREE.FlatShading } ),
+
+            new THREE.MeshLambertMaterial( { color: 0xff9999, shading: THREE.FlatShading } )
+        ] );
+        cube = new THREE.Mesh( cubeGeom, cubeFaceMaterial );
+        cube.rotation.set(0,3,0);
+        scene.add(cube);   
+     }
+
+     function getRandom (min, max){
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)+1);
+     }
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        count += 1 ;
+        requestAnimationFrame( render ); 
+        console.log(count)
+
+        if (count <=200){
+            camera.position.z -= .01;
+        }
+        if (count >= 200 && count<250){
+            
+            camera.rotation.y += 0.008;   
+        } 
+        if (count >=250 && count<350){
+            camera.translate.x+=Math.random()*5;
+            camera.position.z -=0.01;
+        } 
+        if(count>=350 && count<450){
+            camera.position.z+= 0.01;
+            camera.rotation.y-=0.008;
+            camera.translate.x+=Math.random()*5;
+        }
+        if (count>=450 && count<550){
+            camera.position.z+= 0.01;
+        }
+        if (count>=550 && count<700){
+            camera.position.z+=0.01;
+        }
+        if (count>=700 && count<900){
+            camera.position.z+=0.01;
+        }
+        if (count>=900 && count<950){
+            camera.rotation.y-=0.01;
+        }
+        if (count>=950 && count<1000){
+            camera.position.z+=0.01;
+        }
+        if (count >= 1000 && count <1100){
+            camera.translate.x=-Math.random()*10;
+            camera.rotation.y-=0.03;
+            camera.position.z-=0.01;
+        }
+        if (count>=1100 && count<1500){
+            camera.position.z+=0.01;
+        }
+        if (count>=1500 && count<1600){
+            camera.rotation.y-=0.029;
+        }
+        if (count==1600){
+            count = 0;
+    }
+        renderer.render(scene, camera);
+    }
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+        // create world and render scene
+        createWorld();
+
+        for (var j = 0; j < 130; j++){
+            var h = (Math.random()+0.01)*2;
+            var x = (Math.random() -0.5) *10;
+            var z = (Math.random()-0.5) *3;
+            buildings(x,0,z,h);
+        }
+        for (var j = 0; j < 250; j++){
+            var x = (Math.random() - .5)* 20;
+            var y = (Math.random() +0.5) * 5;
+            var z = (Math.random()-0.5) *15;
+            galaxy(x,y,z);
+        }
+        
+        for (var j = 0; j < 300; j++){
+            var h = (Math.random()+0.01)*0.1;
+            var x = (Math.random() - .5) * 30;
+            var z = Math.random()*5;
+            var y=Math.random()*10;
+            tinyStars(x,y+1,z,h);
+        } 
+        
+        count = getRandom(0,500);
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="600" height="300"></canvas>
+</div>
+</body>
+</html>

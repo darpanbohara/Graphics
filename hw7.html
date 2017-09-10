@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<head>
+<title>Inner Planets</title>
+<script src="three.min.js"></script>
+<script src="KeyboardState.js"></script>
+
+<script>
+//Darpan Bohara
+//homework 7
+//Please use Safari while opening the html file 
+//Solar system shows only the inner planets 
+//Can use down, up and left, right arrow keys to zoom in and out and to move left and right respectively
+
+    var scene, camera, renderer;  // Three.js rendering basics.
+
+    var canvas;  // The canvas on which the image is rendered.
+
+    var dirLight; // Our directional light is global so we can change its position.
+    var angle;    // The angle (about the y-axis) of the directional light.
+    //Object for hierarchical rotation
+    var earth;
+    var planets; 
+    var moon;
+    var mercury;
+    var venus;
+    var mars;
+    //keyboard functions
+    var keyboard = new KeyboardState();
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    function createWorld() {
+        
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(45, canvas.width/canvas.height, 0.1, 500);
+        camera.position.z = 300; // pull back the camera
+        //camera.position.y=10;
+        scene.rotation.x=0.8;
+
+        // ambient light
+        ambientLight = new THREE.AmbientLight("red",1);
+        scene.add(ambientLight);
+
+        // TODO: add point light
+        // point light
+        pointLight = new THREE.PointLight("white", 2, 250); // color, intensity, and distance
+        pointLight.position.set( 0, 0, 0 );
+        scene.add(pointLight);
+        pointLight = new THREE.PointLight("white", 200, 250); // color, intensity, and distance
+        pointLight.position.set( -30, 250, 250);
+        scene.add(pointLight);
+        //scene.add(new THREE.PointLightHelper(pointLight, 3)); // see where the light is
+        // TODO: add directional light
+        // directional light
+        dirLight = new THREE.DirectionalLight("white", 1);
+        dirLight.position.set(200, 200, 300);
+        scene.add(dirLight);
+        dirLight = new THREE.DirectionalLight("white", 1);
+        dirLight.position.set(-200, -200, -300);
+        scene.add(dirLight);
+        // Initialize the planets and the moon and add them to the scene
+        planets = new THREE.Object3D();
+        earth= new THREE.Object3D();
+        moon = new THREE.Object3D();
+        mercury = new THREE.Object3D();
+        venus= new THREE.Object3D();
+        mars = new THREE.Object3D();
+        scene.add(planets);
+        scene.add(earth);
+        scene.add(moon);
+        scene.add(mercury);
+        scene.add(venus);
+        scene.add(mars);
+
+        // set up the sphere vars
+        var radius = 35,
+            segments = 30,
+            rings = 30;
+
+        // create the sphere's material
+        // var sunTexture = THREE.ImageUtils.loadTexture("sun.jpg");
+        // var sunMaterial = new THREE.MeshPhongMaterial( { map: sunTexture } );
+        // var sphereSun = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(sunMaterial));
+
+        var sphereGeometry = new THREE.SphereGeometry(radius, segments, rings);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: "orange", 
+                                                    opacity: 0.97,
+                                                    transparent: true});
+        var sphereSun = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        //sphereEarth
+        var sphereEGeometry = new THREE.SphereGeometry(radius-18, segments, rings);
+        var sphereEMaterial = new THREE.MeshLambertMaterial({color: "blue"});
+        var sphereEarth = new THREE.Mesh(sphereEGeometry, sphereEMaterial);
+        //sphereMoon
+        var sphereMGeometry = new THREE.SphereGeometry(radius-28, segments, rings);
+        var sphereMMaterial = new THREE.MeshLambertMaterial({color: "teal"});
+        var sphereMoon = new THREE.Mesh(sphereMGeometry, sphereMMaterial);
+        //mercury
+        var sphereMGeometry = new THREE.SphereGeometry(radius-28, segments, rings);
+        var sphereMMaterial = new THREE.MeshLambertMaterial({color: "brown"});
+        var sphereMercury = new THREE.Mesh(sphereMGeometry, sphereMMaterial);
+        //venus
+        var sphereMGeometry = new THREE.SphereGeometry(radius-24, segments, rings);
+        var sphereMMaterial = new THREE.MeshLambertMaterial({color: "yellow"});
+        var sphereVenus = new THREE.Mesh(sphereMGeometry, sphereMMaterial);
+        //mars
+        var sphereMGeometry = new THREE.SphereGeometry(radius-22, segments, rings);
+        var sphereMMaterial = new THREE.MeshLambertMaterial({color: "red"});
+        var sphereMars = new THREE.Mesh(sphereMGeometry, sphereMMaterial);
+        // add the sphere to the scene
+        scene.add(sphereSun); 
+        scene.add(sphereEarth);
+        scene.add(sphereMoon);
+        scene.add(sphereMercury);
+        scene.add(sphereVenus);
+        scene.add(sphereMars);
+        //add the earth and the moon to planets variable
+        moon.add(sphereMoon);
+        earth.add(sphereEarth);
+        planets.add(moon);
+        planets.add(earth);
+        mercury.add(sphereMercury);
+        venus.add(sphereVenus);
+        mars.add(sphereMars);
+        //translate the earth and the moon 
+        //sphereMoon.position.x=100;
+        sphereMoon.position.x=40;
+        moon.position.x=140; //move center of rotation to the center of the earth
+        //sphereEarth.position.x=130;
+        earth.position.x=140;
+        sphereMercury.position.x=60;
+        sphereVenus.position.x=90;
+        sphereMars.position.x=210;
+        //moon.position.x=30;
+        //planets.position.x=100;
+    }
+    function galaxy(cx,cy,cz){
+       var sphereGeometry = new THREE.SphereGeometry(1, 30, 30);
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: "white", 
+                                                    opacity: 0.97,
+                                                    transparent: true});
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        if((cx>50 || cx<-50)&& (cy>30 || cy<-30)){
+        scene.add( sphere );
+        sphere.position.z = cz;
+        sphere.position.x = cx ;
+        sphere.position.y = cy ;
+            
+        }
+        
+        
+    }
+
+    function update() {
+        keyboard.update();
+//can use keyboard.down
+        if ( keyboard.pressed("left") ) {
+            camera.position.x += 1;
+            //camera.position.y+=1;
+        }
+        if ( keyboard.pressed("right") ) {
+            camera.position.x -= 1;
+        }
+        if ( keyboard.pressed("down") ) {
+            camera.position.z += 1;
+        }
+        if ( keyboard.pressed("up") ) {
+            camera.position.z -= 1;
+        }
+    }
+
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        requestAnimationFrame( render );
+
+        // TODO animation here
+        moon.rotation.y+=0.05; //moon rotates around the earth
+        earth.rotation.y+=0.01; //earth has it's own rotation
+        planets.rotation.y+=0.02; //moon and earth rotate around the sun
+        mercury.rotation.y+=0.08;
+        venus.rotation.y+=0.03;
+        mars.rotation.y+=0.02;
+        renderer.render(scene, camera);
+        update();
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+        // create world and render scene
+        createWorld();
+         for (var j = 0; j < 150; j++){
+            var x = Math.floor(((Math.random()-.5) * 1000) + 1);
+            var y = Math.floor(((Math.random()-.5) * 300) +1);
+            var z = Math.floor((Math.random() * 100) + 1);;
+            galaxy(x,y,z);
+        }
+        
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="900" height="500"></canvas>
+</div>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<head>
+<title>Pyramid</title>
+<script src="three.min.js"></script>
+
+<!-- Modified from the MeshFaceMaterial.html example in our textbook 
+    (Introduction to Computer Graphics) by David J. Eck -->
+
+<script>
+    var scene, camera, renderer; // Three.js rendering basics.
+    var canvas; // The canvas on which the image is rendered.
+    var pyramid;
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    var count = 0;
+
+    function createWorld() {
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(90, 2, 1, 30);
+        camera.position.z = 5;
+        camera.position.y = 1;
+        // camera.position.y = 0;
+    
+        // create some lights and add them to the scene.
+        // dim light shining from above
+        scene.add( new THREE.DirectionalLight( 0xffffff, 0.4 ) );
+
+        // a light to shine in the direction the camera faces
+        var viewpointLight = new THREE.DirectionalLight( 0xffffff, 0.8 );  
+        viewpointLight.position.set(0,0,1);  // shines down the z-axis
+        scene.add(viewpointLight);
+
+        var geometry = new THREE.PlaneGeometry(12,5 );
+        var material = new THREE.MeshBasicMaterial({color: 0xffff00, side: THREE.DoubleSide});
+        var plane = new THREE.Mesh( geometry, material );
+        plane.rotation.set(4.9,0,0)
+        scene.add( plane );
+    }
+
+
+    function pyramids(cx,cy,cz,height){
+        // set up the geometry for our pyramid
+        var pyramidGeom = new THREE.Geometry();
+        // TODO 3: create the (x,y,z) points for the 5 vertices of our pyramid
+        pyramidGeom.vertices = [  // array of Vector3 giving vertex coordinates
+            new THREE.Vector3(cx+1,cy,cz+1),  // vertex number 0
+            new THREE.Vector3(cx+1,cy,cz-1),  // vertex number 1
+            new THREE.Vector3(cx-1,cy,cz-1),  // vertex number 2
+            new THREE.Vector3(cx-1,cy,cz+1),  // vertex number 3
+            new THREE.Vector3(cx,cy+height,cz)   // vertex number 4
+        ];
+        // TODO 4: using the indices of the vertices above, create triangular faces
+        pyramidGeom.faces = [  // array of Face3 giving the triangular faces
+            new THREE.Face3(3,2,1),  // one half of the bottom face
+            new THREE.Face3(3,1,0),  // second half of the bottom face
+            new THREE.Face3(3,0,4),  // remaining faces are the four sides
+            new THREE.Face3(0,1,4),
+            new THREE.Face3(1,2,4),
+            new THREE.Face3(3,4,2)
+        ];
+        // compute normals so we know which way is facing "out"
+        pyramidGeom.computeFaceNormals();
+    
+        // map the faces to materials
+        pyramidGeom.faces[0].materialIndex = 0;
+        for (var i = 1; i <= 5; i++) {
+            pyramidGeom.faces[i].materialIndex = i-1;
+        }
+        // Creates a material for the pyramid that is "matte" not "shiny".
+        var pyramidFaceMaterial = new THREE.MeshFaceMaterial( [
+            new THREE.MeshLambertMaterial( { color: 0xF08080, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0xFF4500, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0xFF00FF, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0x00BFFF, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0x00FFFF, shading: THREE.FlatShading } )
+        ] );
+        pyramid = new THREE.Mesh( pyramidGeom, pyramidFaceMaterial );
+        pyramid.rotation.set(.2,0,0);
+        scene.add(pyramid);
+       // pyramid.rotation.set(1,5,0.1);    
+     }
+
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        count += 1 ;
+        //camera.position.z -= .01;
+        requestAnimationFrame( render ); 
+        console.log(count)
+        if (count <=250){
+            camera.position.z -= .01;
+            camera.translate.x+=1;
+        }
+        if (count >= 260 && count<400){
+            camera.position.z += 0.01;     
+            camera.rotation.y += -Math.random() * 0.01;
+        } 
+        if (count >=400 && count<600){
+            camera.position.z+=-0.01;
+            camera.translate.x+=Math.random()*10;
+        }
+        if(count>=600 && count<650){
+            camera.position.z+=-0.01;
+            camera.rotation.y+=Math.random()*0.01;
+        }
+        if (count>=650 && count<950){
+            camera.position.z+=-0.01;
+            camera.translate.x=Math.random()*10;
+            camera.rotation.y+=Math.random()*0.01;
+        }
+        if (count>=950 && count<1000){
+            camera.position.z+=-0.01;
+            camera.rotation.y+=Math.random()*0.01;
+        }
+        if (count>=1000 && count<1400){
+            camera.position.z+=0.01;
+            camera.translate.x=-Math.random()*100;
+            //camera.translate.z=-0.3;
+        }
+        if (count==1400 ){
+            count = 260;
+        }
+        renderer.render(scene, camera);
+    }
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+        // create world and render scene
+        createWorld();
+        for (var j = 0; j < 10; j++){
+            var h = Math.random()+1;
+            var x = (Math.random() - .5) * 10;
+            var z = Math.random();
+            pyramids(x,0,z,h);
+        }
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="600" height="300"></canvas>
+</div>
+</body>
+</html>

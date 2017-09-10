@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Diamond Animation</title>
+
+<script>
+    //Darpan Bohara
+    var canvas;    // DOM object corresponding to the canvas
+    var graphics;  // 2D graphics context for drawing on the canvas
+    var count =0;
+    var sideLength = 30; // side length of our square
+
+
+
+    function diamond() {
+        var radius = 100;
+        graphics.beginPath();
+        graphics.moveTo(200,200-radius);
+        graphics.lineTo(200-radius,200);
+        graphics.lineTo(200,200+radius);
+        graphics.lineTo(200+radius,200);
+        graphics.closePath();
+        graphics.stroke();
+        graphics.fillStyle = "black";
+        graphics.fillText("large",100,120);
+        graphics.fillText("large",280,290);
+        graphics.fillText("small",100,290);
+        graphics.fillText("small",280,120);
+    }
+
+    function animate() {
+        // clear background and draw diamond
+        graphics.save();
+        graphics.setTransform(1, 0, 0, 1, 0, 0);
+        graphics.clearRect(-15, -15, canvas.width, canvas.height);
+        diamond();
+        graphics.restore();
+
+        // TODO: your code here
+        graphics.fillRect(0,0,sideLength,sideLength);
+        if (count <50){
+            graphics.translate(-2,2);
+            count++;
+        }
+        else if (count>=50 && count<150){
+            if (count==50){
+                graphics.scale(0.5,0.5);
+            }
+            graphics.translate(2,2);
+            count++;
+        }
+        else if (count >=150 && count <200){
+            if (count==150){
+                graphics.scale(2,2);
+            }
+            graphics.translate(2,-2);
+            count++;
+        }
+        else if( count>=200 && count<300){
+            if (count==200){
+                graphics.scale(0.5,0.5);
+            }
+            graphics.translate(-2,-2);
+            count++;
+        }
+        else if(count>=300){
+            if (count==300){
+                graphics.scale(2,2);
+            }
+            count=0;
+            //graphics.fillRect(0,0,sideLength,sideLength);
+        }
+    }
+    
+    function draw() {
+        // set fill color
+        graphics.fillStyle = "blue";
+        
+        // move square to top of diamond
+        graphics.translate(200,100);
+        graphics.translate(-15,-15);
+    }
+
+    function init() {
+        canvas = document.getElementById("theCanvas");
+        graphics = canvas.getContext("2d");
+        draw();  // draw something on the canvas
+        setInterval(animate, 10);
+    }
+</script>
+
+
+</head>
+<body onload="init()">
+    <canvas id="theCanvas" width="800" height="400"></canvas>
+</body>
+</html>

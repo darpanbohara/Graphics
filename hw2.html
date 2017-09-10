@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flood Fill</title>
+
+
+<script>
+    //Darpan Bohara
+    // CSC240 Homework 2
+    //Extension: Creative design
+
+    var canvas;    // DOM object corresponding to the canvas
+    var graphics;  // 2D graphics context for drawing on the canvas
+    var timer;
+    // note: change both for a different background color
+    var backgroundColor = "black";
+    var backgroundRGB = [0,0,0,255];
+
+      // draws a regular polygon with n sides, centered at (cx,cy), with radius r
+    function regularPolygon(n, cx, cy, r, lineColor, fillColor) {
+        // set the strokeStyle (not fillStyle) to the desired lineColor
+        graphics.strokeStyle =lineColor;
+        // this begins our polygon
+        graphics.beginPath();
+        graphics.moveTo(r+cx,cy);
+        var theta = (2*Math.PI)/n;
+        for (i=1; i<=n; i++){
+            var a=theta*i;
+            var x= (r*Math.cos(a))+cx;
+            var y = (r *Math.sin(a))+cy;
+            graphics.lineTo(x,y);
+        }
+        // this is what actually draws the polygon
+        graphics.stroke();        
+        // TODO; create a for loop that goes over all n sides, computing the
+        // x and y coordinates for each new vertex of the polygon        
+    }
+
+    // return true if color1==color2, an false otherwise
+    // example input: color1 = [0,255,0,255], pure green
+    function colorEqual(color1, color2) {
+        if ((color1[0]==color2[0])&& (color1[1]==color2[1]) && (color1[2]==color2[2])&&(color1[3]==color2[3])){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    // fill a shape, starting at the pixel (x,y)
+    // note: make sure to set "fillStyle" to the desired fill color 
+    // before calling this function
+    function floodFill(x, y, oldColor) {
+        // note that this returns [R,G,B,A]
+        var pixColor = graphics.getImageData(x, y, 1, 1).data;
+        if(colorEqual(pixColor,oldColor)){
+            graphics.fillRect(x,y,1,1); 
+            floodFill(x,y-1,oldColor);
+            floodFill(x+1,y,oldColor);
+            floodFill(x,y+1,oldColor);
+            floodFill(x-1,y,oldColor);
+        }
+    }
+
+    /*function getAllPoints(x,y,oldColor){
+        //find all the points in edge line 
+        var pixColor = graphics.getImageData(x, y, 1, 1).data;
+        if(!colorEqual(pixColor,oldColor)){
+            edgeX.push(x);
+            edgeY.push(y);
+            return;
+        }
+        else{
+            getAllPoints(x,y-1,oldColor);
+            getAllPoints(x+1,y,oldColor);
+            getAllPoints(x,y+1,oldColor);
+            getAllPoints(x-1,y,oldColor);
+        }
+        
+    }*/
+
+    /*function sweepFill(x,y,oldColor) {
+        //getAllPoints(x,y,oldColor);
+        var minY=Math.min(edgeY);
+        var maxY=Math.max(edgeY);
+        for (y=minY; y<=maxY;y++){
+            xList=[];
+            for(x=0; x<edgeX.length; x++){
+                if (x==y){
+                    xList.push(x)
+                }
+            }
+            var xMin=Math.min(xList);
+            var xMax=Math.max(xList);
+            graphics.moveTo(xMin,y);
+            graphics.lineTo(xMax,y);
+        }
+    }*/
+
+    
+    function draw() {
+        // make sure to color the background first, since it doesn't have a default color
+        graphics.fillStyle = backgroundColor;
+        graphics.fillRect(0,0,canvas.width,canvas.height);
+
+        /*to be used with sweepFill
+        regularPolygon(11, 50,350,50,"red");
+        graphics.fillStyle="deepskyblue";
+        sweepFill(50,350, backgroundRGB);*/
+
+        //To be used with floodfill to obtain hw2.png
+        regularPolygon(11, 50,350,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(50,350, backgroundRGB);
+        regularPolygon(11, 50,250,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(50,250, backgroundRGB);
+        regularPolygon(11, 50,150,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(50,150, backgroundRGB);
+        regularPolygon(11, 50,50,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(50,50, backgroundRGB);
+      
+        regularPolygon(11, 250,350,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(250,350, backgroundRGB);
+        regularPolygon(11, 250,250,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(250,250, backgroundRGB);
+        regularPolygon(11, 250,150,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(250,150, backgroundRGB);
+        regularPolygon(11, 250,50,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(250,50, backgroundRGB);
+
+        //center of H
+        regularPolygon(19, 150,200, 55, "red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(150,250,backgroundRGB);
+
+        regularPolygon(10, 350,350,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(350,350, backgroundRGB);
+        regularPolygon(10, 350,250,50,"red");
+        graphics.fillStyle="deepskyblue";
+        floodFill(350,250, backgroundRGB);
+      
+        regularPolygon(10,350,150,35,"red");
+        graphics.fillStyle="tomato";
+        floodFill(350,150,backgroundRGB);
+        timer = setInterval(floodFill,500,350,150,backgroundRGB);
+    }
+
+    function init() {
+        canvas = document.getElementById("theCanvas");
+        graphics = canvas.getContext("2d");
+        draw();  // draw something on the canvas
+    }
+</script>
+
+
+</head>
+<body onload="init()">
+    <canvas id="theCanvas" width="500" height="500"></canvas>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Transformation Matrices</title>
+
+<script>
+    //CSC 240 HW4
+    //Darpan Bohara
+    //Collaborated with Prayasha Chaudhary
+
+    var canvas;    // DOM object corresponding to the canvas
+    var graphics;  // 2D graphics context for drawing on the canvas
+
+    // this GLOBAL variable is responsible for maintaining the current
+    // set of transformations (3x3)
+    var currMatrix;
+    var count=0;
+   
+
+    function identityMatrix() {
+        var idMatrix=[[1,0,0],[0,1,0],[0,0,1]];
+        return idMatrix;
+    }
+
+    function matrixMultiply(M1, M2) {
+        var productMatrix=[];
+        var rowM1=M1.length;
+        var colM1=M1[0].length;
+        var rowM2=M2.length;
+        var colM2=M2[0].length;
+
+        for (a=0; a<rowM1; a++){
+            productMatrix[a]=[];
+            for(b=0; b<colM2; b++){
+                var productSum=0;
+                for (c=0; c<colM1; c++){
+                    productSum+=(M1[a][c]*M2[c][b]);
+                }
+                productMatrix[a].push(productSum);
+            }
+        }
+        return productMatrix;
+    }
+
+    function scaleMatrix(ax, ay){
+        var s= [[ax,0,0],[0,ay,0],[0,0,1]];
+        //return pushMatrix(s);
+        return s;
+    }
+    function rotateMatrix(theta){
+        return [[Math.cos(theta),Math.sin(-theta),0],[Math.sin(theta),Math.cos(theta),0],[0,0,1]];
+    }
+    function translateMatrix(tx, ty){
+        return [[1,0,tx],[0,1,ty],[0,0,1]];
+    }
+    function reflectionMatrix(){
+        //reflects across the Y axis
+        return [[-1,0,0],[0,1,0],[0,0,1]];
+    }
+    function shearMatrix(lambda) {
+        return [[1,lambda,0],[0,1,0],[0,0,1]];
+    }
+    // this function multiplies the current matrix by another transformation,
+    // then updates the current matrix to the result
+    function pushMatrix(newMatrix) {
+        currMatrix = matrixMultiply(currMatrix, newMatrix); // order very important!
+
+        // note that the setTransform method clear the current matrix and then
+        // sets it to be this new one (it does not build up the transformations!)
+        graphics.setTransform(currMatrix[0][0],currMatrix[1][0],
+                           currMatrix[0][1],currMatrix[1][1],
+                           currMatrix[0][2],currMatrix[1][2]);
+    }
+   
+   /*
+    var trans1=translateMatrix(-150,-150);
+    var trans2=translateMatrix(150,150);
+    var angle1=0.1;
+    var angle2=-0.1;
+    var a=idMatrix;
+    var b=0;
+    
+    function figure8(){
+        if (count==64){
+            count=0;
+            a=trans1;
+            trans1=trans2;
+            trans2=a;
+            b=angle1;
+            angle1=angle2;
+            angle2=b;
+           
+            pushMatrix(trans1);
+            pushMatrix(translateMatrix(9,-8.8));
+            pushMatrix(rotateMatrix(-0.005));
+        }
+        pushMatrix(rotateMatrix(angle1));
+
+        graphics.fillRect(50,50,50,50);
+        
+    }*/
+
+    function figure8(){
+        if (count<=64){
+            pushMatrix(rotateMatrix(0.1));
+            pushMatrix(translateMatrix(8,0));
+            count++;
+        } 
+        else if(count>64 && count<=128){
+           
+            pushMatrix(rotateMatrix(-0.1));
+            pushMatrix(translateMatrix(7,0));
+            count++;
+        }
+        graphics.fillRect(0,0,10,10);
+    }
+
+    function draw() {
+        
+        // graphics.fillRect(0,0,30,30);
+        //pushMatrix(shearMatrix(3));
+        //pushMatrix(scaleMatrix(3,2));
+        // graphics.fillRect(0,0,50,50);
+        pushMatrix(translateMatrix(200,200));
+        //if (counter==40){
+            //pushMatrix(translateMatrix(400,400));
+        //}
+        
+    }
+
+
+    function init() {
+        canvas = document.getElementById("theCanvas");
+        graphics = canvas.getContext("2d");
+        currMatrix=identityMatrix();
+        //console.log(matrixMultiply([[3,2,1],[5,8,9],[0,1,3]],[[2,9,8],[5,7,4],[3,0,1]]));
+        //console.log(matrixMultiply([[3,2],[5,8],[0,1],[9,3]],[[2,9,8],[5,7,4]]));
+        draw();  // draw something on the canvas
+        timer = setInterval(figure8, 50);
+    }
+</script>
+
+
+</head>
+<body onload="init()">
+    <canvas id="theCanvas" width="800" height="800"></canvas>
+</body>
+</html>

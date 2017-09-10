@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bezier Curves</title>
+
+<script>
+//Darpan Bohara
+    var canvas;    // DOM object corresponding to the canvas
+    var graphics;  // 2D graphics context for drawing on the canvas
+    
+
+    function bezierLineHelper(t, p0, p1) {
+        var x0=p0[0];
+        var x1=p1[0];
+        var y0=p0[1];
+        var y1=p1[1];
+        var xt=(1-t)*(x0)+ t*(x1);
+        var yt=(1-t)*y0+ t*(y1);
+        var point =[];
+        point.push(xt,yt);
+        return point;
+    }
+
+    function bezierLine(p0, p1) {
+        var numPoints=[];
+        for (t=0; t<=1; t+=0.1){
+            var point = bezierLineHelper(t,p0,p1);
+            numPoints.push(point);
+        }   
+        graphics.beginPath();
+        graphics.moveTo(p0[0],p0[1]);
+        for (i=0; i<=numPoints.length; i++){
+            graphics.lineTo(numPoints[i][0],numPoints[i][1]);
+            graphics.stroke();
+        }  
+    }
+
+    function bezierQuadHelper(t, p0, p1, p2) {
+        var x = (1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0];
+        var y = (1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1];
+        var point=[];
+        point.push(x,y);
+        window.alert(point);
+        return point;
+    }
+
+    function bezierQuad(p0, p1, p2) {
+        for (t=0; t<=1; t+=0.1){
+            var point = bezierQuadHelper(t,p0,p1,p2);
+            numPoints.push(point);
+        }   
+        graphics.beginPath();
+        graphics.moveTo(p0[0],p0[1]);
+        for (i=0; i<=numPoints.length; i++){
+            graphics.lineTo(numPoints[i][0],numPoints[i][1]);
+            graphics.stroke();
+        }
+    }
+
+    function draw() {
+
+        // set up control points
+        var p0 = [200, 110];
+        var p1 = [200, 300];
+
+        var r1 = [30, 50];
+
+        var q1 = [300,50];
+        var q2 = [330,140];
+
+        // draw 3 bezier curves, all starting at p0 and ending at p1
+        bezierLine(p0, p1);
+        //bezierQuad(p0, r1, p1);
+        //bezierCubic(p0, q1, q2, p1);
+        // notice the difference between the quadratic and cubic curves
+    }
+
+    function init() {
+        canvas = document.getElementById("theCanvas");
+        graphics = canvas.getContext("2d");
+        draw();  // draw something on the canvas
+    }
+</script>
+
+
+</head>
+<body onload="init()">
+    <canvas id="theCanvas" width="640" height="480"></canvas>
+</body>
+</html>
